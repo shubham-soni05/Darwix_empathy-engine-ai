@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Empathy Engine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#09090f;--card:#111118;--border:#222230;--accent:#6c63ff;--accent2:#ff6584;--text:#e8e8f2;--muted:#5a5a72;--r:12px}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 20px 80px}
+    body::before{content:'';position:fixed;top:-150px;left:50%;transform:translateX(-50%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(108,99,255,.13) 0%,transparent 70%);pointer-events:none;z-index:0}
+    header{text-align:center;margin-bottom:36px;z-index:1;position:relative}
+    header h1{font-family:'Space Mono',monospace;font-size:clamp(1.6rem,4vw,2.4rem);background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    header p{margin-top:10px;color:var(--muted);font-size:.9rem;max-width:480px;line-height:1.5}
+    .badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:14px}
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:.72rem;font-family:'Space Mono',monospace;letter-spacing:.4px;border:1px solid}
+    .badge-hf{background:rgba(255,163,0,.10);border-color:rgba(255,163,0,.30);color:#ffa300}
+    .badge-edge{background:rgba(0,164,239,.10);border-color:rgba(0,164,239,.30);color:#00a4ef}
+    .badge-flask{background:rgba(108,99,255,.10);border-color:rgba(108,99,255,.30);color:#6c63ff}
+    .badge-voice{background:rgba(255,101,132,.10);border-color:rgba(255,101,132,.30);color:#ff6584}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;width:100%;max-width:660px;z-index:1;position:relative}
+    .card+.card{margin-top:16px}
+    .lbl{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:block}
+    textarea{width:100%;background:#17171f;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:1rem;padding:14px 16px;resize:vertical;min-height:110px;outline:none;transition:border-color .2s;line-height:1.6}
+    textarea:focus{border-color:var(--accent)}
+    textarea::placeholder{color:var(--muted)}
+    .examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{background:#17171f;border:1px solid var(--border);border-radius:999px;padding:5px 13px;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .15s}
+    .chip:hover{border-color:var(--accent);color:var(--accent)}
+    #analyzeBtn{margin-top:14px;width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'Space Mono',monospace;font-size:.9rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:.5px}
+    #analyzeBtn:hover{opacity:.88}
+    #analyzeBtn:active{transform:scale(.98)}
+    #analyzeBtn:disabled{opacity:.4;cursor:not-allowed}
+    .loader{display:none;text-align:center;padding:22px 0;color:var(--muted);font-size:.88rem;z-index:1}
+    .loader.on{display:block}
+    .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .err{background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);border-radius:8px;padding:11px 15px;color:#ff8080;font-size:.87rem;margin-top:12px;display:none}
+    .err.on{display:block}
+    #results{display:none}
+    .emotion-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:999px;font-family:'Space Mono',monospace;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+    .em-emoji{font-size:1.2rem}
+    .desc{color:var(--muted);font-size:.88rem;margin-bottom:20px;line-height:1.55}
+    .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+    .bar-lbl{width:76px;color:var(--muted);font-size:.78rem;text-transform:capitalize}
+    .bar-track{flex:1;height:5px;background:#222230;border-radius:999px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s ease}
+    .bar-pct{width:38px;text-align:right;color:var(--muted);font-size:.74rem;font-family:'Space Mono',monospace}
+    .params-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+    .param-box{background:#17171f;border:1px solid var(--border);border-radius:8px;padding:14px 12px;text-align:center}
+    .pval{font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent)}
+    .pname{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+    .voice-info{display:flex;align-items:center;gap:10px;background:#17171f;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-top:14px}
+    .vi-icon{font-size:1.3rem}
+    .vi-text{font-size:.82rem;color:var(--muted);line-height:1.4}
+    .vi-text strong{color:var(--text);font-weight:600}
+    #audioSection{margin-top:18px}
+    audio{width:100%;margin-top:8px;border-radius:8px}
+    .joy{background:rgba(255,215,0,.1);color:#ffd700;border:1px solid rgba(255,215,0,.25)}
+    .surprise{background:rgba(255,165,0,.1);color:#ffa500;border:1px solid rgba(255,165,0,.25)}
+    .anger{background:rgba(255,70,70,.1);color:#ff4646;border:1px solid rgba(255,70,70,.25)}
+    .fear{background:rgba(160,110,255,.1);color:#a06eff;border:1px solid rgba(160,110,255,.25)}
+    .sadness{background:rgba(80,140,255,.1);color:#508cff;border:1px solid rgba(80,140,255,.25)}
+    .disgust{background:rgba(80,200,120,.1);color:#50c878;border:1px solid rgba(80,200,120,.25)}
+    .neutral{background:rgba(150,150,180,.1);color:#9696b4;border:1px solid rgba(150,150,180,.25)}
+  </style>
+</head>
+<body>
+<header>
+  <h1>🎙️ Empathy Engine</h1>
+  <p>Type anything — AI detects the emotion and speaks it back with matching vocal energy using an Indian female voice.</p>
+  <div class="badges">
+    <span class="badge badge-hf">🤗 HuggingFace</span>
+    <span class="badge badge-hf">distilroberta</span>
+    <span class="badge badge-edge">⚡ Edge-TTS</span>
+    <span class="badge badge-voice">🎙️ Neerja · en-IN</span>
+    <span class="badge badge-flask">🐍 Flask</span>
+  </div>
+</header>
+
+<div class="card">
+  <label class="lbl" for="textInput">Your text</label>
+  <textarea id="textInput" placeholder="Type something emotional — happy, sad, angry, surprised..."></textarea>
+  <div class="examples">
+    <span class="chip" onclick="setExample(this)">I just got promoted!</span>
+    <span class="chip" onclick="setExample(this)">I am so furious right now.</span>
+    <span class="chip" onclick="setExample(this)">I feel so sad and alone.</span>
+    <span class="chip" onclick="setExample(this)">Oh wow, I did NOT expect that!</span>
+    <span class="chip" onclick="setExample(this)">That is absolutely disgusting.</span>
+    <span class="chip" onclick="setExample(this)">I am so scared right now.</span>
+    <span class="chip" onclick="setExample(this)">The report is due on Friday.</span>
+  </div>
+  <button id="analyzeBtn" onclick="analyze()">⚡ Detect Emotion &amp; Generate Voice</button>
+  <div class="err" id="errMsg"></div>
+</div>
+
+<div class="loader" id="loader">
+  <span class="spinner"></span>Analysing emotion &amp; synthesising voice…
+</div>
+
+<div class="card" id="results">
+  <div id="emotionBadge" class="emotion-badge"></div>
+  <p class="desc" id="emotionDesc"></p>
+  <span class="lbl">Emotion Breakdown</span>
+  <div id="emotionBars"></div>
+  <span class="lbl" style="margin-top:18px;display:block">Voice Parameters</span>
+  <div class="params-grid">
+    <div class="param-box"><div class="pval" id="pRate">—</div><div class="pname">Rate</div></div>
+    <div class="param-box"><div class="pval" id="pPitch">—</div><div class="pname">Pitch</div></div>
+    <div class="param-box"><div class="pval" id="pEmotion">—</div><div class="pname">Emotion</div></div>
+  </div>
+  <div class="voice-info">
+    <span class="vi-icon">🎙️</span>
+    <div class="vi-text">Voice: <strong>Neerja (en-IN-NeerjaNeural)</strong>.</div>
+  </div>
+  <div id="audioSection">
+    <span class="lbl" style="margin-top:18px;display:block">Generated Audio</span>
+    <audio id="audioPlayer" controls></audio>
+  </div>
+</div>
+
+<script>
+var EMOJIS={joy:'😄',surprise:'😲',anger:'😠',fear:'😨',sadness:'😢',disgust:'🤢',neutral:'😐'};
+
+// Rate/Pitch lookup — same as backend, so UI always has correct values
+var EMOTION_PARAMS={
+  joy:     {rate:'+25%', pitch:'+8Hz'},
+  surprise:{rate:'+30%', pitch:'+10Hz'},
+  anger:   {rate:'+15%', pitch:'-5Hz'},
+  fear:    {rate:'-20%', pitch:'+3Hz'},
+  sadness: {rate:'-25%', pitch:'-8Hz'},
+  disgust: {rate:'-10%', pitch:'-5Hz'},
+  neutral: {rate:'+0%',  pitch:'+0Hz'}
+};
+
+function setExample(el){ document.getElementById('textInput').value=el.textContent.trim(); }
+
+async function analyze(){
+  var text=document.getElementById('textInput').value.trim();
+  if(!text){showErr('Please enter some text first.');return;}
+  setLoading(true); hideErr();
+  document.getElementById('results').style.display='none';
+  try{
+    var res=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text})});
+    var d=await res.json();
+    if(d.error){showErr(d.error);return;}
+    render(d);
+  }catch(e){showErr('Could not reach Flask server.');}
+  finally{setLoading(false);}
+}
+
+function render(d){
+  var emotion=d.emotion||'neutral';
+
+  // Emotion badge
+  var badge=document.getElementById('emotionBadge');
+  badge.className='emotion-badge '+emotion;
+  badge.innerHTML='<span class="em-emoji">'+(EMOJIS[emotion]||'🎙️')+'</span> '
+    +cap(emotion)+' <small style="font-weight:400;opacity:.65">('+parseFloat(d.confidence*100).toFixed(1)+'%)</small>';
+
+  // Description
+  document.getElementById('emotionDesc').textContent=d.description||'';
+
+  // Emotion bars
+  var bc=document.getElementById('emotionBars'); bc.innerHTML='';
+  if(d.all_emotions){
+    Object.entries(d.all_emotions).sort(function(a,b){return b[1]-a[1];}).forEach(function(kv){
+      var pct=(kv[1]*100).toFixed(1);
+      bc.innerHTML+='<div class="bar-row"><div class="bar-lbl">'+cap(kv[0])+'</div>'
+        +'<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div>'
+        +'<div class="bar-pct">'+pct+'%</div></div>';
+    });
+  }
+
+  // ── VOICE PARAMS ──
+  // Use server values if present, else fall back to local lookup
+  var rateVal  = (d.rate  && d.rate  !== 'undefined') ? d.rate  : (EMOTION_PARAMS[emotion]||EMOTION_PARAMS.neutral).rate;
+  var pitchVal = (d.pitch && d.pitch !== 'undefined') ? d.pitch : (EMOTION_PARAMS[emotion]||EMOTION_PARAMS.neutral).pitch;
+
+  document.getElementById('pRate').textContent    = rateVal;
+  document.getElementById('pPitch').textContent   = pitchVal;
+  document.getElementById('pEmotion').textContent = cap(emotion);
+
+  // Audio
+  var ap=document.getElementById('audioPlayer');
+  ap.src=d.audio_url+'?t='+Date.now(); ap.load();
+  document.getElementById('results').style.display='block';
+}
+
+function setLoading(v){document.getElementById('loader').className=v?'loader on':'loader';document.getElementById('analyzeBtn').disabled=v;}
+function showErr(m){var e=document.getElementById('errMsg');e.textContent=m;e.className='err on';}
+function hideErr(){document.getElementById('errMsg').className='err';}
+function cap(s){return s?(s[0].toUpperCase()+s.slice(1)):'';}
+document.getElementById('textInput').addEventListener('keydown',function(e){if(e.ctrlKey&&e.key==='Enter')analyze();});
+</script>
+</body>
+</html>
