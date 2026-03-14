@@ -12,8 +12,7 @@ The project demonstrates how Natural Language Processing (NLP) and
 Text-to-Speech (TTS) can work together to create more natural and
 empathetic AI communication.
 
-Technologies used: - Python - Flask - HuggingFace Transformers -
-Edge-TTS - HTML / CSS / JavaScript
+The system is built using **Python, HuggingFace Transformers, Edge-TTS, and Flask**, with a simple **web interface that allows users to input text and hear the generated expressive voice instantly.**
 
 ------------------------------------------------------------------------
 
@@ -37,12 +36,17 @@ Empathy Engine solves this problem by:
 
 ### Emotion Detection
 
-The system uses the HuggingFace transformer model:
+The system uses the HuggingFace transformer model: `j-hartmann/emotion-english-distilroberta-base`
 
-j-hartmann/emotion-english-distilroberta-base
+Detected emotions: 
+- Joy
+- Surprise
+- Anger
+- Fear
+- Sadness
+- Disgust
+- Neutral
 
-Detected emotions: - Joy - Surprise - Anger - Fear - Sadness - Disgust -
-Neutral
 
 ------------------------------------------------------------------------
 
@@ -55,27 +59,23 @@ The detected emotion dynamically modifies:
 
 Example mapping:
 
-  Emotion    Rate   Pitch
-  ---------- ------ -------
-  Joy        +25%   +8Hz
-  Surprise   +30%   +10Hz
-  Anger      +15%   -5Hz
-  Fear       -20%   +3Hz
-  Sadness    -25%   -8Hz
-  Disgust    -10%   -5Hz
-  Neutral    +0%    +0Hz
+| Emotion | Rate | Pitch | Effect |
+|------|------|------|------|
+| Joy | +25% | +8Hz | Energetic |
+| Surprise | +30% | +10Hz | Expressive |
+| Anger | +15% | -5Hz | Firm |
+| Fear | -20% | +3Hz | Tense |
+| Sadness | -25% | -8Hz | Slow & soft |
+| Disgust | -10% | -5Hz | Flat |
+| Neutral | +0% | +0Hz | Normal |
 
 ------------------------------------------------------------------------
 
 ### Realistic Neural Voice
 
-Speech is generated using:
+Speech is generated using: Microsoft Edge-TTS
 
-Microsoft Edge-TTS
-
-Voice used:
-
-en-IN-NeerjaNeural
+Voice used: en-IN-NeerjaNeural
 
 ------------------------------------------------------------------------
 
@@ -120,20 +120,9 @@ Empathy-Engine\
 
 ### 1. Clone Repository
 
-git clone https://github.com/yourusername/empathy-engine.git\
-cd empathy-engine
+git clone https://github.com/shubham-soni05/Darwix_empathy-engine-ai.git\
 
 ### 2. Create Virtual Environment
-
-Windows
-
-python -m venv venv\
-venv`\Scripts`{=tex}`\activate  `{=tex}
-
-Mac/Linux
-
-python3 -m venv venv\
-source venv/bin/activate
 
 ### 3. Install Dependencies
 
@@ -150,9 +139,7 @@ edge-tts
 
 python app.py
 
-Server runs at:
-
-http://localhost:10000
+Server runs at: [http://localhost:10000](http://127.0.0.1:5000)
 
 ------------------------------------------------------------------------
 
@@ -178,13 +165,13 @@ Oh wow, I didn't expect that!
 
 ## 🛠️ Tech Stack
 
-  Technology                 Purpose
-  -------------------------- -------------------
-  Python                     Core programming
-  Flask                      Web API
-  HuggingFace Transformers   Emotion detection
-  Edge-TTS                   Speech synthesis
-  HTML/CSS/JS                Web interface
+ | Technology   |              Purpose |
+  |-------------------------- |------------------- |
+  | Python                    | Core programming |
+  | Flask                     | Web API |
+  | HuggingFace Transformers  | Emotion detection |
+  | Edge-TTS                  | Speech synthesis |
+  | HTML/CSS/JS               | Web interface |
 
 ------------------------------------------------------------------------
 
