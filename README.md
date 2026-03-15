@@ -120,7 +120,7 @@ Empathy-Engine\
 
 ### 1. Clone Repository
 
-git clone https://github.com/shubham-soni05/Darwix_empathy-engine-ai.git\
+git clone https://github.com/shubham-soni05/Darwix_empathy-engine-ai.git
 
 ### 2. Create Virtual Environment
 
